@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Information</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css"> <!-- Link to your style.css -->
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        thead th {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-transform: uppercase;
+        }
+
+        tbody td {
+            padding: 15px;
+            color: #333;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+
+        tbody tr:hover {
+            background-color: #e9f7fe;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 5px;
+        }
+
+        .btn {
+            border-radius: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+        <h2>Restaurant Information</h2>
+        
+        <h3>All Restaurants</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Restaurant Name</th>
+                    <th>Location</th>
+                    <th>Type of Restaurant</th>
+                    <th>Menu</th>
+                    <th>Price</th>
+                    <th>Overall Reviews</th>
+                    <th>Post-Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in restaurant_information %}
+                <tr>
+                    <td>{{ row['Restaurant Name'] }}</td>
+                    <td>{{ row['Location'] }}</td>
+                    <td>{{ row['Type of restaurant'] }}</td>
+                    <td>{{ row['Menu'] }}</td>
+                    <td>{{ row['Price'] }}</td>
+                    <td>{{ row['Overall reviews'] }}</td>
+                    <td>{{ row['Post-Code'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Add Restaurant</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <input type="text" class="form-control" name="type" required>
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" name="location" required>
+            </div>
+            <div class="form-group">
+                <label for="postcode">Post-Code:</label>
+                <input type="text" class="form-control" name="postcode" required>
+            </div>
+            <div class="form-group">
+                <label for="reviews">Reviews:</label>
+                <input type="text" class="form-control" name="reviews" required>
+            </div>
+            <div class="form-group">
+                <label for="menu">Menu:</label>
+                <input type="text" class="form-control" name="menu" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" class="form-control" name="price" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+
+        <h3>Update Restaurant</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="update">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <input type="text" class="form-control" name="type">
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" name="location">
+            </div>
+            <div class="form-group">
+                <label for="postcode">Post-Code:</label>
+                <input type="text" class="form-control" name="postcode">
+            </div>
+            <div class="form-group">
+                <label for="reviews">Reviews:</label>
+                <input type="text" class="form-control" name="reviews">
+            </div>
+            <div class="form-group">
+                <label for="menu">Menu:</label>
+                <input type="text" class="form-control" name="menu">
+            </div>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" class="form-control" name="price">
+            </div>
+            <button type="submit" class="btn btn-warning">Update</button>
+        </form>
+
+        <h3>Delete Restaurant</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="delete">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+
+        <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="navbar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Feedback</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Welcome to DineWise</h1>
+        <h2>Your Guide to the Best Dining Experiences</h2>
+        <div class="button-container">
+            <a href="{{ url_for('register') }}" class="button">Register</a>
+            <a href="{{ url_for('admin') }}" class="button">Admin</a>
+            <a href="{{ url_for('login') }}" class="button">Login</a>
+        </div>
+    </div>
+    <div class="about">
+        <h3>About DineWise</h3>
+        <p>Welcome to DineWise – where dining meets intelligence.</p>
+        <p>DineWise stands at the forefront of dining innovation, offering an unparalleled mobile experience empowered by cutting-edge artificial intelligence (AI) technology. Seamlessly blending the art of gastronomy with the precision of AI, DineWise redefines the restaurant reservation process, transforming it into an effortless journey of culinary discovery.</p>
+        <p>DineWise learns and adapts to your preferences, curating bespoke recommendations tailored to your unique tastes and desires.</p>
+        <p>Imagine yourself exploring the bustling streets of London, surrounded by a plethora of dining options. Instead of feeling overwhelmed by the choices, you reach for your phone and open DineWise. Using its intuitive AI-powered interface, you effortlessly convey your culinary desires, dietary needs, and preferred dining atmosphere.</p>
+        <p>In an instant, DineWise presents you with a handpicked selection of restaurants that perfectly align with your preferences. Each recommendation is carefully curated to ensure a delightful dining experience tailored just for you.</p>
+        <p>But DineWise doesn't stop there. With its seamless reservation process, you can secure a table at your chosen restaurant with ease. Gone are the days of lengthy phone calls and frustrating wait times. With just a few taps on your screen, DineWise takes care of the entire booking process, providing real-time availability and ensuring a smooth transition from craving to reservation.</p>
+        <p>Discover a new way to dine with DineWise, your intelligent dining companion.</p>
+    </div>
+
+    <div class="testimonials">
+        <h3>What Our Users Say</h3>
+        <p>"DineWise helped me find the best dining spots in town!" - Jane Doe</p>
+        <p>"DineWise saved me alot of time!" - Jessica Nobel</p>
+    </div>
+    <div class="contact">
+        <h3>Contact Us</h3>
+        <p>Email: contact@dinewise.com</p>
+        <p>Instagram: dinewise</p>
+
+    </div>
+    <footer>
+        <p>&copy; 2024 DineWise. All rights reserved. | <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="booking-container">
+        <h2>Your Bookings</h2>
+        {% if bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Restaurant</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Guests</th>
+                        <th>Special Requests</th>
+                        <th>Order</th>
+                        <th>Total Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.name }}</td>
+                            <td>{{ booking.restaurant }}</td>
+                            <td>{{ booking.date }}</td>
+                            <td>{{ booking.time }}</td>
+                            <td>{{ booking.guests }}</td>
+                            <td>{{ booking.desires }}</td>
+                            <td>{{ booking.order }}</td>
+                            <td>£{{ booking.total_price }}</td>
+                            <td>
+                                <form method="post" action="/cancel_booking">
+                                    <input type="hidden" name="booking_to_cancel" value="{{ booking.name }}">
+                                    <button type="submit">Cancel</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>You have no bookings.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
