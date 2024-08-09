@@ -8,20 +8,20 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: url('/static/b.jpg') no-repeat center center fixed;
+            background: url('/static/stucco-light-surface.jpg') no-repeat center center fixed;
             background-size: cover;
             margin: 0;
             padding: 0;
         }
         .chat-container {
             width: 90%;
-            max-width: 600px;
+            max-width: 800px; /* Increased max-width for a larger box */
             margin: 0 auto;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 50px;
+            padding: 40px; /* Increased padding */
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly less transparent */
+            border-radius: 15px; /* Increased border-radius for a more rounded look */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); /* Slightly darker shadow */
+            margin-top: 80px; /* Increased margin-top */
         }
         h2 {
             text-align: center;
@@ -30,28 +30,28 @@
         form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px; /* Increased gap between form elements */
         }
         input[type="text"] {
-            padding: 10px;
-            border-radius: 5px;
+            padding: 15px; /* Increased padding */
+            border-radius: 10px; /* Increased border-radius */
             border: 1px solid #ccc;
-            width: calc(100% - 22px);
-            margin-bottom: 10px;
+            width: calc(100% - 32px); /* Adjusted for new padding */
+            margin-bottom: 20px; /* Increased margin-bottom */
         }
         button {
-            padding: 10px 20px;
+            padding: 15px 30px; /* Increased padding */
             border: none;
-            border-radius: 5px;
+            border-radius: 10px; /* Increased border-radius */
             background-color: #007bff;
             color: white;
             cursor: pointer;
-            align-self: center;
-            width: 48%;
             text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease; /* Added transform transition */
         }
         button:hover {
             background-color: #0056b3;
+            transform: scale(1.05); /* Added scaling effect on hover */
         }
         .chat-log {
             margin: 20px 0;
@@ -59,9 +59,9 @@
         }
         .chat-log p {
             background-color: #f1f1f1;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+            padding: 15px; /* Increased padding */
+            border-radius: 10px; /* Increased border-radius */
+            margin: 15px 0; /* Increased margin */
             word-wrap: break-word;
         }
         .chat-log strong {
@@ -76,13 +76,17 @@
         }
         .booking-log li {
             background-color: #f1f1f1;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 15px; /* Increased padding */
+            border-radius: 10px; /* Increased border-radius */
             margin: 10px 0;
         }
         .button-container {
             display: flex;
             justify-content: space-between;
+            gap: 20px; /* Added gap between buttons */
+        }
+        .button-container form {
+            flex: 1;
         }
     </style>
 </head>
@@ -121,10 +125,10 @@
         {% endif %}
 
         <div class="button-container">
-            <form action="{{ url_for('booking') }}" method="get" style="flex: 1;">
+            <form action="{{ url_for('booking') }}" method="get">
                 <button type="submit">Book a Table</button>
             </form>
-            <form action="{{ url_for('manage_bookings') }}" method="get" style="flex: 1;">
+            <form action="{{ url_for('manage_bookings') }}" method="get">
                 <button type="submit">Manage Bookings</button>
             </form>
         </div>

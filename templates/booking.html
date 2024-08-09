@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        var selectedItems = [];
+        var selectedItems = {};
 
-        function openMenuModal() {
+        function openMenuModal(personIndex) {
             var restaurantDropdown = document.getElementById('restaurant');
             var selectedRestaurant = restaurantDropdown.value;
             if (selectedRestaurant) {
@@ -22,28 +22,34 @@
                         var parts = menuItem.split(' - £');
                         var itemName = parts[0];
                         var itemPrice = parseFloat(parts[1]);
-                        
+
                         listItem.textContent = menuItem;
                         var checkbox = document.createElement("input");
                         checkbox.type = "checkbox";
                         checkbox.value = itemName;
                         checkbox.dataset.price = itemPrice;
-                        checkbox.name = "order";
-                        checkbox.checked = selectedItems.some(item => item.name === itemName); // Maintain state
+                        checkbox.name = `orderPerson${personIndex}`;
+                        checkbox.checked = selectedItems[personIndex] && selectedItems[personIndex].some(item => item.name === itemName); // Maintain state
                         checkbox.addEventListener('change', function() {
-                            if (this.checked) {
-                                selectedItems.push({name: this.value, price: itemPrice});
-                            } else {
-                                selectedItems = selectedItems.filter(item => item.name !== this.value);
+                            if (!selectedItems[personIndex]) {
+                                selectedItems[personIndex] = [];
                             }
-                            document.getElementById('selectedItems').value = JSON.stringify(selectedItems);
-                            updateTotalPrice();
+                            if (this.checked) {
+                                selectedItems[personIndex].push({name: this.value, price: itemPrice});
+                            } else {
+                                selectedItems[personIndex] = selectedItems[personIndex].filter(item => item.name !== this.value);
+                            }
+                            document.getElementById(`selectedItemsPerson${personIndex}`).value = JSON.stringify(selectedItems[personIndex]);
+                            updateTotalPriceForPerson(personIndex);
+                            updateOverallTotalPrice();
                         });
                         listItem.prepend(checkbox);
                         menuListElement.appendChild(listItem);
                     });
+                    menuModal.dataset.personIndex = personIndex;
                     menuModal.style.display = 'block';
-                    updateTotalPrice();
+                    updateTotalPriceForPerson(personIndex);
+                    updateOverallTotalPrice();
                 });
             }
         }
@@ -53,17 +59,39 @@
             menuModal.style.display = 'none';
         }
 
-        function updateTotalPrice() {
-            var totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            document.getElementById('totalPrice').textContent = `Total Price: £${totalPrice.toFixed(2)}`;
-            updateSplitAmount();
+        function updateTotalPriceForPerson(personIndex) {
+            var selectedItemsPerson = JSON.parse(document.getElementById(`selectedItemsPerson${personIndex}`).value || '[]');
+            var totalPrice = selectedItemsPerson.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById(`totalPricePerson${personIndex}`).textContent = `Total Price: £${totalPrice.toFixed(2)}`;
         }
 
-        function updateSplitAmount() {
-            var totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
-            var guests = parseInt(document.getElementById('guests').value) || 1;
-            var splitAmount = totalPrice / guests;
-            document.getElementById('splitAmount').textContent = `Split Amount per Person: £${splitAmount.toFixed(2)}`;
+        function updateOverallTotalPrice() {
+            var totalPrice = 0;
+            Object.keys(selectedItems).forEach(personIndex => {
+                var selectedItemsPerson = selectedItems[personIndex] || [];
+                totalPrice += selectedItemsPerson.reduce((sum, item) => sum + item.price, 0);
+            });
+            document.getElementById('overallTotalPrice').textContent = `Total Price: £${totalPrice.toFixed(2)}`;
+        }
+
+        function addPersonFields(num) {
+            const container = document.getElementById('personFieldsContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= num; i++) {
+                const personFields = `
+                    <div class="person-fields">
+                        <h3>Person ${i}</h3>
+                        <button type="button" class="menu-button" onclick="openMenuModal(${i})">Select Menu</button>
+                        <input type="hidden" id="selectedItemsPerson${i}" name="selectedItemsPerson${i}" value="">
+                        <div id="totalPricePerson${i}" class="total-price">Total Price: £0.00</div>
+                        <div class="form-group">
+                            <label for="desiresPerson${i}">Special Requests/Desires:</label>
+                            <textarea id="desiresPerson${i}" name="desiresPerson${i}" class="form-control"></textarea>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', personFields);
+            }
         }
 
         $(document).ready(function() {
@@ -95,7 +123,89 @@
         });
     </script>
     <style>
-        /* Style for the modal */
+        body {
+            font-family: Arial, sans-serif;
+            background: url('/static/stucco-light-surface.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 20px;
+        }
+        .booking-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            margin-top: 50px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .menu-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ecdbbb;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .menu-button:hover {
+            background-color: #d3a16f;
+            transform: scale(1.05);
+        }
+        .person-fields {
+            margin-bottom: 30px;
+        }
+        .total-price {
+            margin-top: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+        button[type="submit"] {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color:  #d3a16f;
+            transform: scale(1.05);
+        }
+        #overallTotalPrice {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -105,7 +215,6 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0,0,0);
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
         }
@@ -116,23 +225,25 @@
             border: 1px solid #888;
             width: 80%;
             max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             color: black;
         }
         .close {
-            color: #aaa;
+            color: #28a745;
             float: right;
             font-size: 28px;
             font-weight: bold;
         }
         .close:hover,
         .close:focus {
-            color: black;
+            color: #d3a16f;
             text-decoration: none;
             cursor: pointer;
         }
-        /* Style for the menu list items */
         #menuList li {
             color: black;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -140,11 +251,11 @@
     <div class="booking-container">
         <h2>Book a Table</h2>
         <form id="bookingForm">
-            <div>
+            <div class="form-group">
                 <label for="name">Your Name:</label>
                 <input type="text" id="name" name="name" value="{{ fullname }}" readonly required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="restaurant">Restaurant Name:</label>
                 <select id="restaurant" name="restaurant" required>
                     <option value="" disabled selected>Select a restaurant</option>
@@ -153,42 +264,34 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
-                <button type="button" onclick="openMenuModal()">View Menu</button>
-            </div>
-            <div>
+            <div class="form-group">
                 <label for="date">Date:</label>
                 <input type="date" id="date" name="date" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="time">Time:</label>
                 <input type="time" id="time" name="time" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="guests">Number of Guests:</label>
-                <input type="number" id="guests" name="guests" required oninput="updateSplitAmount()">
+                <input type="number" id="guests" name="guests" required oninput="addPersonFields(this.value);">
             </div>
-            <div>
-                <label for="desires">Special Requests/Desires:</label>
-                <textarea id="desires" name="desires"></textarea>
-            </div>
-            <div>
+            <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" value="{{ email }}" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="phone">Phone Number:</label>
                 <input type="tel" id="phone" name="phone" value="{{ phone }}" required>
             </div>
-            <input type="hidden" id="selectedItems" name="selectedItems" value="">
-            <div id="totalPrice">Total Price: £0.00</div>
-            <div id="splitAmount">Split Amount per Person: £0.00</div>
+            <div id="personFieldsContainer"></div>
+            <div id="overallTotalPrice">Total Price: £0.00</div>
             <div>
                 <button type="submit">Book Now</button>
             </div>
         </form>
     </div>
-
+    
     <!-- The Menu Modal -->
     <div id="menuModal" class="modal">
         <div class="modal-content">
@@ -200,13 +303,277 @@
             <button type="button" onclick="closeMenuModal()">Done</button>
         </div>
     </div>
-
+    
     <!-- The Confirmation Modal -->
-    <div id="confirmationModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p id="confirmationMessage"></p>
-        </div>
+<div id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p id="confirmationMessage"></p>
     </div>
+</div>
+
+<script>
+    var selectedItems = {};
+
+    function openMenuModal(personIndex) {
+        var restaurantDropdown = document.getElementById('restaurant');
+        var selectedRestaurant = restaurantDropdown.value;
+        if (selectedRestaurant) {
+            $.post('/get_menu', { restaurant: selectedRestaurant }, function(menuList) {
+                var menuModal = document.getElementById('menuModal');
+                var menuListElement = document.getElementById('menuList');
+                menuListElement.innerHTML = ''; // Clear previous menu items
+                menuList.forEach(function(menuItem) {
+                    var listItem = document.createElement("li");
+                    var parts = menuItem.split(' - £');
+                    var itemName = parts[0];
+                    var itemPrice = parseFloat(parts[1]);
+
+                    listItem.textContent = menuItem;
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.value = itemName;
+                    checkbox.dataset.price = itemPrice;
+                    checkbox.name = `orderPerson${personIndex}`;
+                    checkbox.checked = selectedItems[personIndex] && selectedItems[personIndex].some(item => item.name === itemName); // Maintain state
+                    checkbox.addEventListener('change', function() {
+                        if (!selectedItems[personIndex]) {
+                            selectedItems[personIndex] = [];
+                        }
+                        if (this.checked) {
+                            selectedItems[personIndex].push({name: this.value, price: itemPrice});
+                        } else {
+                            selectedItems[personIndex] = selectedItems[personIndex].filter(item => item.name !== this.value);
+                        }
+                        document.getElementById(`selectedItemsPerson${personIndex}`).value = JSON.stringify(selectedItems[personIndex]);
+                        updateTotalPriceForPerson(personIndex);
+                        updateOverallTotalPrice();
+                    });
+                    listItem.prepend(checkbox);
+                    menuListElement.appendChild(listItem);
+                });
+                menuModal.dataset.personIndex = personIndex;
+                menuModal.style.display = 'block';
+                updateTotalPriceForPerson(personIndex);
+                updateOverallTotalPrice();
+            });
+        }
+    }
+
+    function closeMenuModal() {
+        var menuModal = document.getElementById('menuModal');
+        menuModal.style.display = 'none';
+    }
+
+    function updateTotalPriceForPerson(personIndex) {
+        var selectedItemsPerson = JSON.parse(document.getElementById(`selectedItemsPerson${personIndex}`).value || '[]');
+        var totalPrice = selectedItemsPerson.reduce((sum, item) => sum + item.price, 0);
+        document.getElementById(`totalPricePerson${personIndex}`).textContent = `Total Price: £${totalPrice.toFixed(2)}`;
+    }
+
+    function updateOverallTotalPrice() {
+        var totalPrice = 0;
+        Object.keys(selectedItems).forEach(personIndex => {
+            var selectedItemsPerson = selectedItems[personIndex] || [];
+            totalPrice += selectedItemsPerson.reduce((sum, item) => sum + item.price, 0);
+        });
+        document.getElementById('overallTotalPrice').textContent = `Total Price: £${totalPrice.toFixed(2)}`;
+    }
+
+    function addPersonFields(num) {
+        const container = document.getElementById('personFieldsContainer');
+        container.innerHTML = '';
+        for (let i = 1; i <= num; i++) {
+            const personFields = `
+                <div class="person-fields">
+                    <h3>Person ${i}</h3>
+                    <button type="button" class="menu-button" onclick="openMenuModal(${i})">Select Menu</button>
+                    <input type="hidden" id="selectedItemsPerson${i}" name="selectedItemsPerson${i}" value="">
+                    <div id="totalPricePerson${i}" class="total-price">Total Price: £0.00</div>
+                    <div class="form-group">
+                        <label for="desiresPerson${i}">Special Requests/Desires:</label>
+                        <textarea id="desiresPerson${i}" name="desiresPerson${i}" class="form-control"></textarea>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', personFields);
+        }
+    }
+
+    $(document).ready(function() {
+        $('#bookingForm').on('submit', function(event) {
+            event.preventDefault();
+            $.ajax({
+                url: '/book_table',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.status === 'error') {
+                        $('#confirmationMessage').text(response.message);
+                        $('#confirmationModal').show();
+                    } else {
+                        $('#confirmationMessage').text('Booking successful!');
+                        $('#confirmationModal').show();
+                    }
+                },
+                error: function(error) {
+                    $('#confirmationMessage').text('Booking failed. Please try again.');
+                    $('#confirmationModal').show();
+                }
+            });
+        });
+
+        $('.close').on('click', function() {
+            $('#confirmationModal').hide();
+        });
+    });
+</script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: url('/static/stucco-light-surface.jpg') no-repeat center center fixed;
+        background-size: cover;
+        margin: 0;
+        padding: 20px;
+    }
+    .booking-container {
+        width: 90%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        margin-top: 50px;
+    }
+    h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+    textarea {
+        resize: vertical;
+        height: 100px;
+    }
+    .menu-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #ecdbbb;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        margin-bottom: 10px;
+    }
+    .menu-button:hover {
+        background-color: #d3a16f;
+        transform: scale(1.05);
+    }
+    .person-fields {
+        margin-bottom: 30px;
+    }
+    .total-price {
+        margin-top: 10px;
+        font-size: 1.1em;
+        font-weight: bold;
+        color: #333;
+    }
+    button[type="submit"] {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        background-color:  #ecdbbb;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    button[type="submit"]:hover {
+        background-color: #d3a16f;
+        transform: scale(1.05);
+    }
+    #overallTotalPrice {
+        margin-top: 20px;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: center;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+        padding-top: 60px;
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        color: black;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    #menuList li {
+        color: black;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<!-- The Menu Modal -->
+<div id="menuModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeMenuModal()">&times;</span>
+        <h2>Menu</h2>
+        <ul id="menuList">
+            <!-- Menu items will be populated here -->
+        </ul>
+        <button type="button" onclick="closeMenuModal()">Done</button>
+    </div>
+</div>
+
+<!-- The Confirmation Modal -->
+<div id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p id="confirmationMessage"></p>
+    </div>
+</div>
 </body>
 </html>
+

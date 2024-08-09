@@ -7,76 +7,50 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/style.css"> <!-- Link to your style.css -->
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('/static/stucco-light-surface.jpg');
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        thead th {
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            text-transform: uppercase;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-
-        tbody td {
-            padding: 15px;
-            color: #333;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f7f7f7;
-        }
-
-        tbody tr:hover {
-            background-color: #e9f7fe;
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        a:hover {
-            background-color: #0056b3;
-            transform: translateY(-3px);
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
+        th {
+            background-color: #f2f2f2;
             font-weight: bold;
         }
-
-        .form-control {
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin: 20px 0;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            padding: 10px 20px;
             border-radius: 5px;
         }
-
-        .btn {
-            border-radius: 50px;
+        a:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>

@@ -7,137 +7,86 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: url('/static/b.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: url('/static/stucco-light-surface.jpg');
             margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            position: relative;
-        }
-
-        .overlay {
-            background: rgba(0, 0, 0, 0.7);
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 1;
-        }
-
-        .container {
-            z-index: 2;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            width: 85%;
-            max-width: 1200px;
-            margin-top: 20px;
-            text-align: left;
         }
-
         h2 {
-            font-size: 2.8em;
-            margin-bottom: 20px;
-            color: #007bff;
             text-align: center;
+            color: #333;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        thead th {
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            text-transform: uppercase;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-
-        tbody td {
-            padding: 15px;
-            color: #333;
-            border-bottom: 1px solid #e0e0e0;
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
-
-        tbody tr:nth-child(even) {
-            background-color: #f7f7f7;
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
-
-        tbody tr:hover {
-            background-color: #e9f7fe;
+        tr:hover {
+            background-color: #f1f1f1;
         }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
         a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            margin-top: 20px;
+            display: block;
             text-align: center;
+            margin: 20px 0;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 5px;
         }
-
         a:hover {
             background-color: #0056b3;
-            transform: translateY(-3px);
         }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="container">
-        <h2>Reservation Book</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Restaurant Name</th>
-                    <th>Person Name</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Order</th>
-                    <th>Desires</th>
-                    <th>Phone Number</th>
-                    <th>Number of People</th>
-                    <th>Email</th>
-                    <th>Total Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in reservations %}
-                <tr>
-                    <td>{{ row.get('Resturant Name', 'N/A') }}</td> <!-- Note the spelling -->
-                    <td>{{ row.get('Person Name', 'N/A') }}</td>
-                    <td>{{ row.get('date', 'N/A') }}</td> <!-- Note the lowercase 'date' -->
-                    <td>{{ row.get('Time', 'N/A') }}</td>
-                    <td>{{ row.get('order', 'N/A') }}</td> <!-- Note the lowercase 'order' -->
-                    <td>{{ row.get('Desires', 'N/A') }}</td>
-                    <td>{{ row.get('Phone number', 'N/A') }}</td> <!-- Note the lowercase 'number' -->
-                    <td>{{ row.get('Number of people', 'N/A') }}</td> <!-- Note the lowercase 'people' -->
-                    <td>{{ row.get('email', 'N/A') }}</td> <!-- Note the lowercase 'email' -->
-                    <td>{{ row.get('total price', 'N/A') }}</td> <!-- Note the lowercase 'total price' -->
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <a href="{{ url_for('logout_admin') }}">Logout</a>
-    </div>
+    <h2>Reservation Book</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Restaurant Name</th>
+                <th>Person Name</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Order</th>
+                <th>Desires</th>
+                <th>Phone Number</th>
+                <th>Number of People</th>
+                <th>Email</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in reservations %}
+            <tr>
+                <td>{{ row['Resturant Name'] }}</td>
+                <td>{{ row['Person Name'] }}</td>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['Time'] }}</td>
+                <td>{{ row['order'] }}</td>
+                <td>{{ row['Desires'] }}</td>
+                <td>{{ row['Phone number'] }}</td>
+                <td>{{ row['Number of people'] }}</td>
+                <td>{{ row['email'] }}</td>
+                <td>{{ row['total price'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('logout_admin') }}">Logout</a>
+   
 </body>
 </html>

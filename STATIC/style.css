@@ -1,41 +1,43 @@
 body {
     font-family: 'Arial', sans-serif;
-    background: url('/static/b.jpg') no-repeat center center fixed;
-    background-size: cover;
+    background: url('/static/stucco-light-surface.jpg');
     margin: 0;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: white;
+    color: #333; /* Dark text color */
     text-align: center;
     position: relative;
 }
 
 .overlay {
-    background: rgba(0, 0, 0, 0.5); /* Dark overlay */
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
+    display: none; /* Remove overlay */
 }
 
-.container {
-    z-index: 2; /* Ensure the container is above the overlay */
+.container, .featured, .testimonials, .contact, .about, .register-container {
+    z-index: 2;
     padding: 20px;
+    background-color: #f7efe9dd; /* White background for content */
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    margin-bottom: 20px;
+    text-align: left;
+    color: #333; /* Dark text color */
 }
 
 h1 {
     font-size: 4em;
     margin-bottom: 20px;
     font-weight: bold;
+    color: #333; /* Dark text color */
 }
 
 h2 {
     font-size: 1.5em;
     margin-bottom: 30px;
+    color: #333; /* Dark text color */
 }
 
 .button-container {
@@ -47,8 +49,8 @@ h2 {
 .button {
     display: inline-block;
     padding: 15px 30px;
-    background-color: #007bff;
-    color: #fff;
+    background-color: #ecdbbb;
+    color: #000000;
     text-decoration: none;
     border-radius: 50px;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -56,7 +58,7 @@ h2 {
 }
 
 .button:hover {
-    background-color: #0077b3;
+    background-color: #d3a16f;
     transform: translateY(-3px);
 }
 
@@ -65,7 +67,7 @@ h2 {
     padding: 15px 0;
     position: absolute;
     top: 0;
-    background: rgba(0, 0, 0, 0.5); /* Transparent background */
+    background: #f8f9fa; /* Light gray background color */
     z-index: 3;
 }
 
@@ -83,7 +85,7 @@ h2 {
 }
 
 .navbar a {
-    color: white;
+    color: #333;
     text-decoration: none;
     font-size: 1.2em;
 }
@@ -92,75 +94,11 @@ h2 {
     text-decoration: underline;
 }
 
-.featured, .testimonials, .contact, .about {
-    z-index: 2;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    width: 80%;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
 footer {
     width: 100%;
     padding: 20px 0;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    text-align: center;
-    z-index: 2;
-}
-
-.register-container {
-    
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 400px;
-    text-align: left;
-    z-index: 2; /* Ensure the register container is above the overlay */
-}
-
-.register-container h2 {
-    margin-bottom: 20px;
+    background: #f8f9fa; /* Light gray background color */
     color: #333;
     text-align: center;
-}
-
-form div {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 1.2em;
-    color: #555;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    font-size: 1em;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #0056b3;
+    z-index: 2;
 }

@@ -12,8 +12,6 @@ from openai.error import RateLimitError, OpenAIError
 import bcrypt
 from dotenv import load_dotenv
 
-
-
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -21,7 +19,6 @@ app.secret_key = os.urandom(24)
 load_dotenv()
 # Initialize OpenAI API
 openai.api_key = os.getenv('OPENAI_API_KEY')
- # Replace with your OpenAI API key
 
 # Load restaurant information from Excel
 restaurant_data = pd.read_excel('Restaurant information.xlsx')
@@ -311,16 +308,10 @@ def book_table():
     restaurant = request.form.get('restaurant')
     date = request.form.get('date')
     time = request.form.get('time')
-    guests = request.form.get('guests')
+    guests = int(request.form.get('guests'))
     desires = request.form.get('desires')
     email = request.form.get('email')
     phone = request.form.get('phone')
-    selected_items = request.form.get('selectedItems')
-    
-    # Convert the JSON string back to a list
-    order_list = eval(selected_items) if selected_items else []
-    order = ', '.join([item['name'] for item in order_list])
-    total_price = sum(item['price'] for item in order_list)
     
     # Path to the Excel file
     excel_path = 'the reservation book.xlsx'
@@ -337,27 +328,46 @@ def book_table():
 
     if existing_bookings >= 3:
         return jsonify({"status": "error", "message": "Sorry, the maximum number of bookings for this time slot has been reached."})
-    
-    # Find the next empty row
-    next_row = sheet.max_row + 1
 
-    # Fill the row with form data
-    sheet.cell(row=next_row, column=4, value=name)
-    sheet.cell(row=next_row, column=3, value=restaurant)
-    sheet.cell(row=next_row, column=5, value=date)
-    sheet.cell(row=next_row, column=6, value=time)
-    sheet.cell(row=next_row, column=10, value=guests)
-    sheet.cell(row=next_row, column=8, value=desires)
-    sheet.cell(row=next_row, column=11, value=email)
-    sheet.cell(row=next_row, column=9, value=phone)
-    sheet.cell(row=next_row, column=7, value=order)  # Join selected menu items as a comma-separated string
-    sheet.cell(row=next_row, column=12, value=total_price)  # Save the total price
+    # Ensure the new "Person Number" column exists
+    if 'Person Number' not in [cell.value for cell in sheet[1]]:
+        sheet.insert_cols(9)
+        sheet.cell(row=1, column=9, value="Person Number")
+
+    total_price_all_guests = 0  # Initialize the total price for all guests
+
+    # Save details for each guest, including the user
+    for i in range(1, guests + 1):
+        selected_items = request.form.get(f'selectedItemsPerson{i}')
+        
+        # Convert the JSON string back to a list
+        order_list = eval(selected_items) if selected_items else []
+        order = ', '.join([item['name'] for item in order_list])
+        total_price = sum(item['price'] for item in order_list)
+        special_desires = request.form.get(f'desiresPerson{i}')
+        
+        total_price_all_guests += total_price  # Accumulate the total price
+
+        # Find the next empty row
+        next_row = sheet.max_row + 1
+        # Fill the row with form data
+        sheet.cell(row=next_row, column=4, value=name)
+        sheet.cell(row=next_row, column=3, value=restaurant)
+        sheet.cell(row=next_row, column=5, value=date)
+        sheet.cell(row=next_row, column=6, value=time)
+        sheet.cell(row=next_row, column=11, value=guests)
+        sheet.cell(row=next_row, column=8, value=special_desires)
+        sheet.cell(row=next_row, column=12, value=email)
+        sheet.cell(row=next_row, column=10, value=phone)
+        sheet.cell(row=next_row, column=9, value=f"Person {i}")
+        sheet.cell(row=next_row, column=7, value=f"{order}")
+        sheet.cell(row=next_row, column=13, value=total_price)
 
     # Save the Excel file
     book.save(excel_path)
     
     # Send confirmation email
-    send_confirmation_email(email, name, restaurant, date, time, guests, order, total_price)
+    send_confirmation_email(email, name, restaurant, date, time, guests, total_price_all_guests)
 
     return jsonify({"status": "success"})
 
@@ -378,7 +388,7 @@ def manage_bookings():
     # Find bookings for the logged-in user
     user_bookings = []
     for row in sheet.iter_rows(min_row=2, max_col=sheet.max_column, values_only=True):
-        if row[10] == user_email:  # Assuming email is in the 11th column (index 10)
+        if row[11] == user_email:  # Assuming email is in the 12th column (index 11)
             user_bookings.append({
                 'name': row[3],
                 'restaurant': row[2],
@@ -386,16 +396,20 @@ def manage_bookings():
                 'time': row[5],
                 'guests': row[9],
                 'desires': row[7],
-                'email': row[10],
+                'email': row[11],
                 'phone': row[8],
                 'order': row[6],
-                'total_price': row[11]
+                'total_price': row[12]
             })
     
+    print("User bookings:", user_bookings)  # Debugging line
+    
     return render_template('manage_bookings.html', bookings=user_bookings)
-
 @app.route('/cancel_booking', methods=['POST'])
 def cancel_booking():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
     user_email = session['user']['Email']
     booking_to_cancel = request.form.get('booking_to_cancel')
     
@@ -403,19 +417,32 @@ def cancel_booking():
     excel_path = 'the reservation book.xlsx'
     
     # Load the existing Excel file
-    book = openpyxl.load_workbook(excel_path)
-    sheet = book.active
+    try:
+        book = openpyxl.load_workbook(excel_path)
+        sheet = book.active
+    except Exception as e:
+        return f"Error loading Excel file: {str(e)}", 500
     
     # Find and delete the booking
+    booking_found = False
     for row in sheet.iter_rows(min_row=2, max_col=sheet.max_column):
-        if row[10].value == user_email and row[3].value == booking_to_cancel:  # Match email and booking name
-            sheet.delete_rows(row[0].row, 1)
+        if row[10].value == user_email and row[3].value == booking_to_cancel:
+            sheet.delete_rows(row[0].row)
+            booking_found = True
+            break
+    
+    if booking_found:
+        try:
             book.save(excel_path)
-            return redirect(url_for('manage_bookings'))
+        except Exception as e:
+            return f"Error saving Excel file: {str(e)}", 500
+        
+        return redirect(url_for('manage_bookings'))
     
     return 'Booking not found', 404
 
-def send_confirmation_email(email, name, restaurant, date, time, guests, order, total_price):
+
+def send_confirmation_email(email, name, restaurant, date, time, guests, total_price_all_guests):
     sender_email = "futurestudiesal@gmail.com"
     sender_password = "smouaqyorbjrsicd"
     subject = "Booking Confirmation"
@@ -428,13 +455,26 @@ def send_confirmation_email(email, name, restaurant, date, time, guests, order, 
     Date: {date}
     Time: {time}
     Guests: {guests}
-    Order: {order}
-    Total Price: £{total_price:.2f}
+    Total Price: £{total_price_all_guests:.2f}
 
+    Individual Orders:
+    """
+    
+    for i in range(1, guests + 1):
+        selected_items_person = eval(request.form.get(f'selectedItemsPerson{i}')) if request.form.get(f'selectedItemsPerson{i}') else []
+        order = ', '.join([item['name'] for item in selected_items_person])
+        special_desires = request.form.get(f'desiresPerson{i}')
+        body += f"""
+        Person {i}:
+        Order: {order}
+        Special Desires: {special_desires}
+        """
+    
+    body += """
     Thank you for your booking.
 
     Best regards,
-    Your Restaurant Team
+    Your {restaurant} Team
     """
     
     msg = MIMEMultipart()
@@ -479,7 +519,7 @@ def admin_login():
         else:
             error_message = 'Invalid credentials. Please try again.'
 
-    return render_template('admin_login.html', error_message=error_message)
+    return render_template('admin.html', error_message=error_message)
 
 @app.route('/view_register_book')
 def view_register_book():
@@ -555,16 +595,15 @@ def view_reservations():
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    if 'admin' not in session:
-        logging.debug("Admin not in session, redirecting to admin login")
+    if 'admin' in session:
+        return render_template('admin_dashboard.html')
+    else:
         return redirect(url_for('admin_login'))
-    logging.debug("Rendering admin dashboard")
-    return render_template('admin_dashboard.html')
 
 @app.route('/logout_admin')
 def logout_admin():
     session.pop('admin', None)
-    return redirect(url_for('index'))
+    return redirect(url_for('admin_login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
